@@ -32,6 +32,7 @@ endif()
 
 # Add directory containing FindSFML.cmake to module path
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Extlibs/SFML/cmake/Modules/;${CMAKE_MODULE_PATH}")
+message(STATUS $ENV{CMAKE_MODULE_PATH})
 
 # Make sure that FindSFML.cmake searches for the static libraries
 if(SFML_STATIC_LIBS)
@@ -126,6 +127,14 @@ set(AILIB_SRC
 	${SRC_DIR}/raahn/AutoEncoder.cpp
 	${SRC_DIR}/raahn/HebbianLearner.cpp
 	${SRC_DIR}/raahn/RAAHN.cpp
+	${SRC_DIR}/plot/curve.cpp
+	${SRC_DIR}/plot/plot.cpp
+	${SRC_DIR}/plot/area.cpp
+	${SRC_DIR}/plot/grid.cpp
+	${SRC_DIR}/plot/axis.cpp
+	${SRC_DIR}/plot/line.cpp
+	${SRC_DIR}/chtm/CHTMRL.cpp
+	${SRC_DIR}/chtm/CHTMRegion.cpp
 	${SRC_DIR}/ctrnn/CTRNN.h
 	${SRC_DIR}/ctrnn/GeneticAlgorithm.h
 	${SRC_DIR}/deep/ConvNet2D.h
@@ -191,10 +200,13 @@ set(AILIB_SRC
 	${SRC_DIR}/raahn/RAAHN.h
 )
 
+file(COPY Resources DESTINATION .)
+
 # Tell CMake to build a executable
 add_executable(AILib ${AILIB_SRC})
 
 # Link SFML
+message(STATUS $ENV{SFML_LIBRARIES})
 target_link_libraries(AILib ${SFML_LIBRARIES} ${SFML_DEPENDENCIES})
 
 # Install executable

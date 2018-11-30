@@ -90,6 +90,8 @@ misrepresented as being the original software.
 #include <fstream>
 #include <sstream>
 
+//#include <dirent.h>
+
 /*int main() {
 	std::mt19937 generator(time(nullptr));*/
 	
@@ -1180,7 +1182,8 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 	return 0;
 }*/
 
-/*int main() {
+/*int main(int argc, char* argv[]) {
+    std::cout << argv[0] << std::endl;
 	std::mt19937 generator(time(nullptr));
 
 	float inputs[4][2] {
@@ -1237,8 +1240,6 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 
 		std::cout << out[0] << std::endl;
 	}
-
-	system("pause");
 
 	float reward = 0.0f;
 	float prevReward = 0.0f;
@@ -1594,7 +1595,10 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 
 			plot.prepare();
 
-			cAverage.prepare(sf::Vector2f(0.0f, totalTime), sf::Vector2f(plotMin, plotMax));
+            sf::Vector2f vec1 = sf::Vector2f(0.0f, totalTime);
+            sf::Vector2f vec2 = sf::Vector2f(plotMin, plotMax);
+
+			cAverage.prepare(vec1, vec2);
 
 			rt.draw(plot);
 
@@ -2160,14 +2164,14 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 	} while (!quit);
 }*/
 
-int main() {
+/*int main() {
 	sf::RenderWindow window;
 
 	window.create(sf::VideoMode(800, 600), "Mountain Car");
 
 	//window.setVerticalSyncEnabled(true);
 
-	window.setFramerateLimit(60);
+	//window.setFramerateLimit(60);
 
 	// -------------------------- Load Resources --------------------------
 
@@ -2236,8 +2240,14 @@ int main() {
 	sf::Image image;
 
 	image.create(16, 16);
-
+    int ctr = 0;
+    float maxpos = -100.0f;
 	do {
+        ctr++;
+        if (!(ctr % 100))
+        {
+            std::cout << ctr << " " << maxpos <<  std::endl;
+        }
 		clock.restart();
 
 		// ----------------------------- Input -----------------------------
@@ -2280,6 +2290,13 @@ int main() {
 		actionMask[3] = true;
 
 		htm.step(fitness, state, actionMask, action, 0.2f, 16, 0.02f, 0.8f, 0.0f, 0.1f, 32.0f, 1.0f, 8, 32.0f, 4.0f, 4.0f, 0.001f, 0.005f, 0.005f, 0.005f, 0.05f, 0.0001f, 0.0f, 0.005f, 0.5f, 0.99f, 0.97f, 1.0f, 0.05f, 0.05f, generator);
+        if (sinf(3.0f * position) > maxpos) {
+            maxpos = sinf(3.0f * position);
+            if (maxpos > 0.9999f) {
+                std::cout << "FINISHED " << ctr << std::endl;
+            }
+        }
+
 
 		float actionf;
 
@@ -2303,21 +2320,25 @@ int main() {
 		// Draw hills
 		window.draw(&hills[0], hills.size(), sf::Lines);
 
-		cartSprite.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) * 0.5f + pixelsPerMeter * position, static_cast<float>(window.getSize().y) * 0.5f + pixelsPerMeter * -0.333f * std::sinf(3.0f * position)));
+		cartSprite.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) * 0.5f + pixelsPerMeter * position, static_cast<float>(window.getSize().y) * 0.5f + pixelsPerMeter * -0.333f * sinf(3.0f * position)));
 
 		float slope = std::cos(3.0f * position);
 
 		float angle = std::atan(slope);
 
-		cartSprite.setRotation(360.0f - 180.0f / static_cast<float>(std::_Pi) * angle);
+		cartSprite.setRotation(360.0f - 180.0f / static_cast<float>(M_PI) * angle);
 
 		window.draw(cartSprite);
 
 		for (int x = 0; x < 16; x++)
 		for (int y = 0; y < 16; y++) {
-			sf::Color c;
-
-			c.r = htm.getRegion().getColumn(x, y)._predictionState * 255.0f;
+            sf::Color c;
+            //This was _predictionState but that's never set?!
+            c.r = htm.getRegion().getColumn(x, y)._state * 255.0f;
+            float pstate = htm.getRegion().getColumn(x, y)._state;
+            if (pstate > 1.0f) {
+            std::cout << htm.getRegion().getColumn(x, y)._state << std::endl;
+            }
 			c.g = 0;
 			c.b = 0;
 
@@ -2344,7 +2365,7 @@ int main() {
 
 		//dt = clock.getElapsedTime().asSeconds();
 	} while (!quit);
-}
+}*/
 
 /*const size_t entrySize = 30; // 31 if you include the weight
 
@@ -3054,7 +3075,7 @@ int main() {
 	return 0;
 }*/
 
-/*float testFunc(float x) {
+float testFunc(float x) {
 	return std::sin(x * 3.0f);
 }
 
@@ -3378,7 +3399,7 @@ int main() {
 	//c1.prepare(sf::Vector2f(0.0f, 6.28f), sf::Vector2f(-2.0f, 2.0f));
 
 	return 0;
-}*/
+}
 
 /*int main() {
 	std::mt19937 generator(time(nullptr));
@@ -3991,4 +4012,1265 @@ int main() {
 	}
 
 	std::cout << successes << " " << failures << std::endl;
+
+}*/
+
+/*struct Image {
+	std::vector<unsigned char> _image;
+};
+
+int reverseInt(int i) {
+	unsigned char c1, c2, c3, c4;
+
+	c1 = i & 255;
+	c2 = (i >> 8) & 255;
+	c3 = (i >> 16) & 255;
+	c4 = (i >> 24) & 255;
+
+	return ((int)c1 << 24) + ((int)c2 << 16) + ((int)c3 << 8) + c4;
+}
+
+void getMNISTImages(std::vector<Image> &images, const std::string &filename, int numUse) {
+	std::ifstream file(filename, std::ios::binary);
+
+	if (file.is_open()) {
+		int magicNumber = 0;
+		int nImages = 0;
+		int nRows = 0;
+		int nCols = 0;
+
+		file.read((char*)&magicNumber, sizeof(int));
+		magicNumber = reverseInt(magicNumber);
+		file.read((char*)&nImages, sizeof(int));
+		nImages = reverseInt(nImages);
+		file.read((char*)&nRows, sizeof(int));
+		nRows = reverseInt(nRows);
+		file.read((char*)&nCols, sizeof(int));
+		nCols = reverseInt(nCols);
+
+		assert(numUse <= nImages);
+
+		images.resize(numUse);
+
+		for (int i = 0; i < numUse; i++) {
+			assert(file.good());
+
+			images[i]._image.resize(nRows * nCols);
+
+			file.read((char*)&(images[i]._image[0]), sizeof(unsigned char) * images[i]._image.size());
+		}
+	}
+
+	file.close();
+}
+
+void getMNISTLabels(std::vector<unsigned char> &labels, const std::string &filename, int numUse) {
+	std::ifstream file(filename, std::ios::binary);
+
+	if (file.is_open()) {
+		int magicNumber = 0;
+		int nLabels = 0;
+		int nRows = 0;
+		int nCols = 0;
+
+		file.read((char*)&magicNumber, sizeof(magicNumber));
+		magicNumber = reverseInt(magicNumber);
+		file.read((char*)&nLabels, sizeof(nLabels));
+		nLabels = reverseInt(nLabels);
+
+		assert(numUse <= nLabels);
+
+		labels.resize(numUse);
+
+		for (int i = 0; i < numUse; i++) {
+			unsigned char temp = 0;
+			file.read((char*)&temp, sizeof(unsigned char));
+
+			labels[i] = temp;
+		}
+	}
+
+	file.close();
+}
+
+int main() {
+	std::vector<Image> trainingImages;
+	std::vector<unsigned char> trainingLabels;
+
+	getMNISTImages(trainingImages, "MNIST/train-images.idx3-ubyte", 60000);
+	getMNISTLabels(trainingLabels, "MNIST/train-labels.idx1-ubyte", 60000);
+
+	std::vector<Image> testImages;
+	std::vector<unsigned char> testLabels;
+
+	getMNISTImages(testImages, "MNIST/t10k-images.idx3-ubyte", 10000);
+	getMNISTLabels(testLabels, "MNIST/t10k-labels.idx1-ubyte", 10000);
+
+	// Get list of odd and even examples
+	std::vector<int> oddIndices;
+	std::vector<int> evenIndices;
+
+	for (int i = 0; i < trainingLabels.size(); i++) {
+		if (trainingLabels[i] % 2 == 0)
+			evenIndices.push_back(i);
+		else
+			oddIndices.push_back(i);
+	}
+
+	rbf::SDRRBFNetwork sdrrbfnet;
+
+	std::mt19937 generator(time(nullptr));
+
+	std::vector<rbf::SDRRBFNetwork::LayerDesc> layerDescs(3);
+
+	layerDescs[0]._rbfWidth = 56;
+	layerDescs[0]._rbfHeight = 56;
+	layerDescs[0]._receptiveRadius = 4;
+	layerDescs[0]._inhibitionRadius = 3;
+	layerDescs[0]._localActivity = 4.0f;
+	layerDescs[0]._outputIntensity = 0.05f;
+	layerDescs[0]._outputMultiplier = 0.0f;
+
+	layerDescs[1]._rbfWidth = 40;
+	layerDescs[1]._rbfHeight = 40;
+	layerDescs[1]._receptiveRadius = 4;
+	layerDescs[1]._inhibitionRadius = 3;
+	layerDescs[1]._localActivity = 4.0f;
+	layerDescs[1]._outputIntensity = 0.05f;
+	layerDescs[1]._outputMultiplier = 0.5f;
+
+	layerDescs[2]._rbfWidth = 24;
+	layerDescs[2]._rbfHeight = 24;
+	layerDescs[2]._receptiveRadius = 4;
+	layerDescs[2]._inhibitionRadius = 3;
+	layerDescs[2]._localActivity = 4.0f;
+	layerDescs[2]._outputIntensity = 0.05f;
+	layerDescs[2]._outputMultiplier = 0.5f;
+
+	sdrrbfnet.createRandom(28, 28, layerDescs, 10, 0.05f, 0.95f, 0.1f, 0.3f, -0.5f, 0.5f, generator);
+
+	std::vector<float> inputf(28 * 28);
+	std::vector<float> outputf(10);
+
+	std::uniform_int_distribution<int> selectionDist(0, trainingImages.size() - 1);
+	std::uniform_int_distribution<int> selectionDistEven(0, evenIndices.size() - 1);
+	std::uniform_int_distribution<int> selectionDistOdd(0, oddIndices.size() - 1);
+
+	int totalIterUnsupervised = 1000;
+	int totalIterSupervised = 1000;
+
+	for (int i = 0; i < totalIterUnsupervised; i++) {
+		int trainIndex = selectionDist(generator);
+
+		for (int j = 0; j < trainingImages[trainIndex]._image.size(); j++)
+			inputf[j] = trainingImages[trainIndex]._image[j] / 255.0f;
+
+		sdrrbfnet.getOutput(inputf, outputf, 1.0f, 0.01f, 0.0f, 0.0f, 0.001f, 0.5f, generator);
+
+		std::vector<float> target(10, 0.0f);
+
+		target[trainingLabels[trainIndex]] = 1.0f;
+
+		sdrrbfnet.updateUnsupervised(inputf, 0.05f, 0.9f, 0.2f, 1.0f, 0.0001f, 0.01f);
+
+		if (i % 100 == 0)
+			std::cout << "Iter Unsupervised: " << i << " / " << totalIterUnsupervised << std::endl;
+	}
+
+	for (int i = 0; i < totalIterSupervised; i++) {
+		int trainIndex = selectionDist(generator);
+
+		for (int j = 0; j < trainingImages[trainIndex]._image.size(); j++)
+			inputf[j] = trainingImages[trainIndex]._image[j] / 255.0f;
+
+		sdrrbfnet.getOutput(inputf, outputf, 1.0f, 0.01f, 0.0f, 0.0f, 0.001f, 0.5f, generator);
+
+		std::vector<float> target(10, 0.0f);
+
+		target[trainingLabels[trainIndex]] = 1.0f;
+
+		sdrrbfnet.updateSupervised(inputf, outputf, target, 0.05f, 0.1f, 0.1f, 1.0f, 0.0001f, 0.01f);
+
+		if (i % 100 == 0)
+			std::cout << "Supervised Iter: " << i << " / " << totalIterSupervised << std::endl;
+	}
+
+	int wrongs = 0;
+	int oddWrongs = 0;
+	int totalOdds = 0;
+
+	std::uniform_int_distribution<int> testDist(0, testImages.size() - 1);
+
+	int totalIterTest = 500;
+
+	for (int i = 0; i < totalIterTest; i++) {
+		int trainIndex = i;
+
+		for (int j = 0; j < testImages[trainIndex]._image.size(); j++)
+			inputf[j] = testImages[trainIndex]._image[j] / 255.0f;
+
+		sdrrbfnet.getOutput(inputf, outputf, 1.0f, 0.01f, 0.0f, 0.0f, 0.001f, 0.01f, generator);
+
+		int maxIndex = 0;
+
+		for (int j = 0; j < outputf.size(); j++)
+		if (outputf[j] > outputf[maxIndex])
+			maxIndex = j;
+
+		if (maxIndex != testLabels[trainIndex])
+			wrongs++;
+
+		if (testLabels[trainIndex] % 2 == 1) {
+			totalOdds++;
+
+			if (maxIndex != testLabels[trainIndex])
+				oddWrongs++;
+		}
+
+		std::cout << "Result: " << maxIndex << " Actual: " << static_cast<int>(testLabels[trainIndex]) << std::endl;
+	}
+
+	std::cout << "Total Error: " << (static_cast<float>(wrongs) / static_cast<float>(totalIterTest)) * 100.0f << std::endl;
+	std::cout << "Odd Error: " << (static_cast<float>(oddWrongs) / static_cast<float>(totalOdds)) * 100.0f << std::endl;
+
+	return 0;
+}*/
+
+/*struct Sample {
+	float Dens_Lab;
+	float FREQ;
+	float BW;
+	float AMP;
+};
+
+void loadSamples(const std::string &fileName, std::vector<Sample> &samples) {
+	std::ifstream fromFile(fileName);
+
+	samples.clear();
+
+	std::string temp;
+
+	// Read away header
+	fromFile >> temp >> temp >> temp >> temp;
+
+	while (fromFile.good() && !fromFile.eof()) {
+		Sample s;
+		
+		fromFile >> s.Dens_Lab >> s.FREQ >> s.BW >> s.AMP;
+
+		samples.push_back(s);
+	}
+}
+
+int main() {
+	std::mt19937 generator(time(nullptr));
+
+	std::vector<Sample> samples;
+	std::vector<float> valuePossibilities;
+
+	const float valueTolerance = 0.001f;
+	const float sparsity = 0.1f;
+
+	loadSamples("Resources/hilmar_train/train.txt", samples);
+
+	Sample minSamples = samples[0];
+	Sample maxSamples = samples[0];
+
+	for (int si = 1; si < samples.size(); si++) {
+		minSamples.Dens_Lab = std::min(minSamples.Dens_Lab, samples[si].Dens_Lab);
+		minSamples.FREQ = std::min(minSamples.FREQ, samples[si].FREQ);
+		minSamples.BW = std::min(minSamples.BW, samples[si].BW);
+		minSamples.AMP = std::min(minSamples.AMP, samples[si].AMP);
+
+		maxSamples.Dens_Lab = std::max(maxSamples.Dens_Lab, samples[si].Dens_Lab);
+		maxSamples.FREQ = std::max(maxSamples.FREQ, samples[si].FREQ);
+		maxSamples.BW = std::max(maxSamples.BW, samples[si].BW);
+		maxSamples.AMP = std::max(maxSamples.AMP, samples[si].AMP);
+
+		// Search for similar values
+		bool found = false;
+
+		for (int i = 0; i < valuePossibilities.size(); i++) {
+			if (std::abs(valuePossibilities[i] - samples[si].Dens_Lab) < valueTolerance) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			valuePossibilities.push_back(samples[si].Dens_Lab);
+	}
+
+	std::vector<int> randomizedSampleIndicies(samples.size());
+
+	for (int i = 0; i < randomizedSampleIndicies.size(); i++)
+		randomizedSampleIndicies[i] = i;
+
+	std::shuffle(randomizedSampleIndicies.begin(), randomizedSampleIndicies.end(), generator);
+
+	int testSize = 10;
+
+	int testStart = randomizedSampleIndicies.size() - testSize;
+
+	deep::SRBMFA fa;
+
+	std::vector<deep::SRBMFA::LayerDesc> layerDescs(2);
+
+	layerDescs[0]._numHiddenUnits = 200;
+	
+	layerDescs[1]._numHiddenUnits = 80;
+
+	fa.createRandom(3, layerDescs, 1, 0.05f, generator);
+
+	std::uniform_int_distribution<int> sampleDist(0, testStart - 1);
+
+	int unsupervisedIterations = 80000;
+
+	for (int t = 0; t < unsupervisedIterations; t++) {
+		int si = sampleDist(generator);
+
+		Sample &s = samples[randomizedSampleIndicies[si]];
+
+		fa.setInput(0, (s.FREQ - minSamples.FREQ) / (maxSamples.FREQ - minSamples.FREQ));
+		fa.setInput(1, (s.BW - minSamples.BW) / (maxSamples.BW - minSamples.BW));
+		fa.setInput(2, (s.AMP - minSamples.AMP) / (maxSamples.AMP - minSamples.AMP));
+
+		for (int l = 0; l < layerDescs.size(); l++) {
+			fa.activate(sparsity, l);
+
+			fa.learnRBM(l, 0.01f, 0.01f, 0.3f, 0.04f, sparsity, 1, generator);
+		}
+
+		if (t % 1000 == 0)
+			std::cout << (static_cast<float>(t) / unsupervisedIterations * 100.0f) << "%" << std::endl;;
+	}
+
+	int supervisedIterations = 80000;
+
+	for (int t = 0; t < supervisedIterations; t++) {
+		int si = sampleDist(generator);
+
+		Sample &s = samples[randomizedSampleIndicies[si]];
+
+		fa.setInput(0, (s.FREQ - minSamples.FREQ) / (maxSamples.FREQ - minSamples.FREQ));
+		fa.setInput(1, (s.BW - minSamples.BW) / (maxSamples.BW - minSamples.BW));
+		fa.setInput(2, (s.AMP - minSamples.AMP) / (maxSamples.AMP - minSamples.AMP));
+
+		fa.activate(sparsity);
+
+		fa.setOutputUnitTarget(0, s.Dens_Lab);
+
+		fa.learnFFNN(0.01f, 0.3f);
+
+		//std::cout << fa << std::endl;
+
+		if (t % 1000 == 0)
+			std::cout << (static_cast<float>(t) / supervisedIterations * 100.0f) << "%" << std::endl;
+	}
+
+	float errorSum = 0.0f;
+
+	for (int i = 0; i < testSize; i++) {
+		int si = testStart + i;
+
+		Sample &s = samples[randomizedSampleIndicies[si]];
+
+		fa.setInput(0, (s.FREQ - minSamples.FREQ) / (maxSamples.FREQ - minSamples.FREQ));
+		fa.setInput(1, (s.BW - minSamples.BW) / (maxSamples.BW - minSamples.BW));
+		fa.setInput(2, (s.AMP - minSamples.AMP) / (maxSamples.AMP - minSamples.AMP));
+
+		fa.activate(sparsity);
+
+		int closestIndex = 0;
+		float minDistance = 999999.0f;
+
+		float find = fa.getOutputUnitOutput(0);
+
+		for (int i = 0; i < valuePossibilities.size(); i++) {
+			if (std::abs(valuePossibilities[i] - find) < minDistance) {
+				minDistance = std::abs(valuePossibilities[i] - find);
+				closestIndex = i;
+			}
+		}
+
+		float out = valuePossibilities[closestIndex];// minDistance < 0.1f ? valuePossibilities[closestIndex] : find;
+
+		float error = std::abs((s.Dens_Lab - out) / s.Dens_Lab);
+
+		errorSum += error;
+
+		std::cout << "Output: " << out << " Actual: " << s.Dens_Lab << std::endl;
+	}
+
+	errorSum /= testSize;
+
+	std::cout << "Average Error: " << errorSum * 100.0f << std::endl;
+
+	system("pause");
+
+	return 0;
+}*/
+
+/*struct Sample {
+	float _class;
+	std::vector<float> _parameters;
+};
+
+void loadSamples(const std::string &fileName, std::vector<Sample> &samples, int parameters) {
+	std::ifstream fromFile(fileName);
+
+	samples.clear();
+
+	std::string temp;
+
+	// Read away header
+	std::string line;
+	std::getline(fromFile, line);
+
+	while (fromFile.good() && !fromFile.eof()) {
+		Sample s;
+
+		s._parameters.resize(parameters);
+
+		fromFile >> s._class;
+
+		for (int i = 0; i < parameters; i++)
+			fromFile >> s._parameters[i];
+
+		samples.push_back(s);
+	}
+}
+
+int main() {
+	std::mt19937 generator(time(nullptr));
+
+	std::vector<Sample> samples;
+	std::vector<float> valuePossibilities;
+
+	const float valueTolerance = 0.001f;
+	const int parameters = 4;
+
+	loadSamples("Resources/hilmar_train/train.txt", samples, parameters);
+
+	Sample minSamples = samples[0];
+	Sample maxSamples = samples[0];
+
+	for (int si = 1; si < samples.size(); si++) {
+		minSamples._class = std::min(minSamples._class, samples[si]._class);
+
+		for (int i = 0; i < parameters; i++)
+			minSamples._parameters[i] = std::min(minSamples._parameters[i], samples[si]._parameters[i]);
+
+		for (int i = 0; i < parameters; i++)
+			maxSamples._parameters[i] = std::max(maxSamples._parameters[i], samples[si]._parameters[i]);
+
+		// Search for similar values
+		bool found = false;
+
+		for (int i = 0; i < valuePossibilities.size(); i++) {
+			if (std::abs(valuePossibilities[i] - samples[si]._class) < valueTolerance) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			valuePossibilities.push_back(samples[si]._class);
+	}
+
+	std::vector<int> randomizedSampleIndicies(samples.size());
+
+	for (int i = 0; i < randomizedSampleIndicies.size(); i++)
+		randomizedSampleIndicies[i] = i;
+
+	std::shuffle(randomizedSampleIndicies.begin(), randomizedSampleIndicies.end(), generator);
+
+	int testSize = 300;
+
+	int testStart = randomizedSampleIndicies.size() - testSize;
+
+	float errorSum = 0.0f;
+
+	for (int i = 0; i < testSize; i++) {
+		int si = testStart + i;
+
+		Sample &s = samples[randomizedSampleIndicies[si]];
+
+		std::vector<float> weights(testStart);
+
+		for (int j = 0; j < weights.size(); j++) {
+			float dist2 = 0.0f;
+			
+			for (int k = 0; k < parameters; k++)
+				dist2 += std::pow(s._parameters[k] - samples[randomizedSampleIndicies[j]]._parameters[k], 2);
+				
+			weights[j] = dist2;
+		}
+
+		int minIndex = 0;
+
+		for (int j = 1; j < weights.size(); j++)
+			if (weights[j] < weights[minIndex])
+				minIndex = j;
+
+		float out = samples[randomizedSampleIndicies[minIndex]]._class;// minDistance < 0.1f ? valuePossibilities[closestIndex] : find;
+
+		float error = std::abs((s._class - out) / s._class);
+
+		errorSum += error;
+
+		std::cout << "Output: " << out << " Actual: " << s._class << std::endl;
+	}
+
+	errorSum /= testSize;
+
+	std::cout << "Average Error: " << errorSum * 100.0f << std::endl;
+
+	system("pause");
+
+	return 0;
+}*/
+
+/*int main() {
+	std::mt19937 generator(time(nullptr));
+
+	deep::RecurrentSparseAutoencoder rsa;
+
+	const float sequence[96][4] = {
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 1.0f, 1.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 0.0f }
+	};
+
+	float sparsity = 5.01f / 64.0f;
+	float dutyCycleDecay = 0.01f;
+
+	rsa.createRandom(4, 64, sparsity, -0.1f, 0.1f, 0.5f, generator);
+
+	for (int i = 0; i < 100; i++) {
+		for (int j = 0; j < 16; j++) {
+			rsa.stepBegin();
+
+			rsa.setVisibleNodeState(0, sequence[j][0]);
+			rsa.setVisibleNodeState(1, sequence[j][1]);
+			rsa.setVisibleNodeState(2, sequence[j][2]);
+			rsa.setVisibleNodeState(3, sequence[j][3]);
+
+			rsa.learn(sparsity, 0.0f, 0.1f, 0.1f, 0.0f, 1.0f, 0.8f, 1.0f, 1.0f);
+
+			rsa.activate(sparsity, dutyCycleDecay);
+		}
+	}
+
+	float correctCount = 0.0f;
+	float totalCount = 0.0f;
+
+	rsa.clearMemory();
+
+	for (int i = 0; i < 1; i++) {
+		for (int j = 0; j < 16; j++) {
+			rsa.stepBegin();
+
+			rsa.setVisibleNodeState(0, sequence[j][0]);
+			rsa.setVisibleNodeState(1, sequence[j][1]);
+			rsa.setVisibleNodeState(2, sequence[j][2]);
+			rsa.setVisibleNodeState(3, sequence[j][3]);
+
+			float b0 = rsa.getVisibleNodeReconstruction(0) > 0.5f ? 1.0f : 0.0f;
+			float b1 = rsa.getVisibleNodeReconstruction(1) > 0.5f ? 1.0f : 0.0f;
+			float b2 = rsa.getVisibleNodeReconstruction(2) > 0.5f ? 1.0f : 0.0f;
+			float b3 = rsa.getVisibleNodeReconstruction(3) > 0.5f ? 1.0f : 0.0f;
+
+			rsa.activate(sparsity, dutyCycleDecay);
+
+			std::cout << "-----------------------------------" << std::endl;
+
+			std::cout << (sequence[j][0]) << std::endl;
+			std::cout << (sequence[j][1]) << std::endl;
+			std::cout << (sequence[j][2]) << std::endl;
+			std::cout << (sequence[j][3]) << std::endl;
+
+			std::cout << b0 << std::endl;
+			std::cout << b1 << std::endl;
+			std::cout << b2 << std::endl;
+			std::cout << b3 << std::endl;
+
+			std::cout << std::endl;
+
+			correctCount += 4.0f - (std::abs(sequence[j][0] - b0) +
+				std::abs(sequence[j][1] - b1) +
+				std::abs(sequence[j][2] - b2) +
+				std::abs(sequence[j][3] - b3));
+
+			totalCount += 4.0f;
+		}
+	}
+
+	std::cout << "% correct: " << (correctCount / totalCount) * 100.0f << std::endl;
+
+	system("pause");
+
+	return 0;
+}*/
+
+/*struct BufferAndLabel {
+	sf::SoundBuffer _buffer;
+	int _classLabel;
+	std::vector<mfcc::AudioFeatureMFCC> _features;
+	std::vector<float> _sdr;
+};
+
+int main() {
+	std::mt19937 generator(time(nullptr));
+
+	// ------------------------------ Learner Initialization ------------------------------
+
+	int numHidden = 80;
+	float sparsity = 8.01f / numHidden;
+	float dutyCycleDecay = 0.01f;
+
+	deep::RecurrentSparseAutoencoder rsa;
+
+	rsa.createRandom(26, numHidden, sparsity, -0.1f, 0.1f, generator);
+
+	std::uniform_real_distribution<float> weightDist(-0.1f, 0.1f);
+
+	int classes = 2;
+
+	nn::FeedForwardNeuralNetwork ffnn;
+
+	ffnn.createRandom(numHidden, classes, 1, 40, -0.01f, 0.01f, generator);
+
+	// ---------------------------------- Sound Loading ----------------------------------
+
+	std::vector<BufferAndLabel> testSounds(44);
+
+	int maxInputSize = 0;
+
+	for (int i = 0; i < testSounds.size(); i++) {
+		std::string fn = "Resources/testSound" + std::to_string(i + 1) + ".wav";
+
+		testSounds[i]._buffer.loadFromFile(fn);
+
+		testSounds[i]._classLabel = i % 2;
+	}
+
+	int soundCount = testSounds.size() + 1;
+
+	// --------------------------------- Extract Features --------------------------------
+
+	int featureSamplesLength = 400;
+	int featureSamplesStep = 200;
+
+	mfcc::MelFilterBank bank;
+	bank.create(26, featureSamplesLength, 300.0f, 8000.0f, 8000.0f);
+
+	for (int t = 0; t < testSounds.size(); t++) {
+		int numFeatures = (testSounds[t]._buffer.getSampleCount() - featureSamplesLength + 1) / featureSamplesStep;
+
+		int numSamplesUse = featureSamplesStep * (numFeatures + 1) + featureSamplesLength;
+
+		std::vector<short> samples(numSamplesUse, 0);
+
+		for (int s = 0; s < testSounds[t]._buffer.getSampleCount(); s++)
+			samples[s] = testSounds[t]._buffer.getSamples()[s];
+
+		testSounds[t]._features.resize(numFeatures);
+		
+		int start = 0;
+
+		for (int f = 0; f < numFeatures; f++) {
+			testSounds[t]._features[f].extract(samples, start, featureSamplesLength, bank);
+
+			start += featureSamplesStep;
+		}
+
+		std::cout << "Features extracted from sound " << t << std::endl;
+	}
+
+	// ----------------------------------- Training -----------------------------------
+
+	std::uniform_int_distribution<int> sampleDist(0, testSounds.size() - 1);
+
+	for (int t = 0; t < 500; t++) {
+		int i = sampleDist(generator);
+
+		rsa.clearMemory();
+
+		for (int f = 0; f < testSounds[i]._features.size(); f++) {
+			rsa.stepBegin();
+
+			for (int s = 0; s < 26; s++)
+				rsa.setVisibleNodeState(s, testSounds[i]._features[f].getCoeff(s) * 0.01f);
+
+			rsa.learn(sparsity, 0.0f, 0.2f, 0.1f, 0.0f, 1.0f, 0.5f, 1.0f, 1.0f);
+
+			rsa.activate(sparsity, dutyCycleDecay);
+		}
+
+		if (t % 10 == 0) {
+			std::cout << "Unsupervised: " << t << std::endl;
+
+			std::cout << "SDR: " << std::endl;
+
+			for (int p = 0; p < numHidden; p++) {
+				if (rsa.getHiddenNodeState(p) > 0.001f)
+					std::cout << "X";
+				else
+					std::cout << "_";
+			}
+		}
+	}
+
+	for (int t = 0; t < testSounds.size(); t++) {
+		rsa.clearMemory();
+
+		for (int f = 0; f < testSounds[t]._features.size(); f++) {
+			rsa.stepBegin();
+
+			for (int s = 0; s < 26; s++)
+				rsa.setVisibleNodeState(s, testSounds[t]._features[f].getCoeff(s) * 0.01f);
+
+			rsa.activate(sparsity, dutyCycleDecay);
+		}
+
+		testSounds[t]._sdr.resize(numHidden);
+
+		for (int i = 0; i < numHidden; i++)
+			testSounds[t]._sdr[i] = rsa.getHiddenNodeState(i);
+	}
+
+	for (int t = 0; t < 500000; t++) {
+		int i = sampleDist(generator);
+
+		// Classifier
+		for (int p = 0; p < numHidden; p++) {
+			ffnn.setInput(p, testSounds[i]._sdr[p]);
+		}
+
+		ffnn.activate();
+
+		int maxIndex = 0;
+
+		for (int c = 1; c < classes; c++) {
+			if (ffnn.getOutput(c) > ffnn.getOutput(maxIndex))
+				maxIndex = c;
+		}
+
+		std::vector<float> targets(classes, 0.0f);
+
+		targets[testSounds[i]._classLabel] = 1.0f;
+
+		nn::FeedForwardNeuralNetwork::Gradient grad;
+
+		ffnn.getGradient(targets, grad);
+
+		ffnn.moveAlongGradientMomentum(grad, 0.004f, 0.3f);
+
+		ffnn.decayWeights(0.0001f);
+
+		if (t % 1000 == 0)
+			std::cout << "Training: " << t << " Prediction: " << maxIndex << " Actual: " << testSounds[i]._classLabel << std::endl;
+	}
+
+	// ----------------------------------- Windowing ----------------------------------
+
+	if (!sf::SoundBufferRecorder::isAvailable())
+		std::cerr << "No recording device available!" << std::endl;
+
+	sf::RenderWindow window;
+
+	sf::SoundBufferRecorder recorder;
+
+	sf::Clock clock;
+
+	window.create(sf::VideoMode(800, 600), "Speech Recognition", sf::Style::Default);
+
+	float dt = 0.017f;
+
+	bool quit = false;
+
+	bool recording = false;
+
+	do {
+		clock.restart();
+
+		// ----------------------------- Input -----------------------------
+
+		sf::Event windowEvent;
+
+		while (window.pollEvent(windowEvent))
+		{
+			switch (windowEvent.type)
+			{
+			case sf::Event::Closed:
+				quit = true;
+				break;
+
+			case sf::Event::KeyReleased:
+				if (windowEvent.key.code == sf::Keyboard::R) {
+					if (recording) {
+						recorder.stop();
+
+						const sf::SoundBuffer &buffer = recorder.getBuffer();
+
+						buffer.saveToFile("testSound" + std::to_string(soundCount) + ".wav");
+
+						soundCount++;
+
+						sf::Sound sound;
+
+						sound.setBuffer(buffer);
+
+						sound.play();
+
+						int numFeatures = (buffer.getSampleCount() - featureSamplesLength + 1) / featureSamplesStep;
+
+						int numSamplesUse = featureSamplesStep * (numFeatures + 1) + featureSamplesLength;
+
+						std::vector<mfcc::AudioFeatureMFCC> features(numFeatures);
+
+						std::vector<short> samples(numSamplesUse, 0);
+
+						for (int s = 0; s < buffer.getSampleCount(); s++)
+							samples[s] = buffer.getSamples()[s];
+
+						features.resize(numFeatures);
+
+						int start = 0;
+
+						for (int f = 0; f < numFeatures; f++) {
+							features[f].extract(samples, start, featureSamplesLength, bank);
+
+							start += featureSamplesStep;
+						}
+
+						// Classify recording
+						rsa.clearMemory();
+
+						for (int f = 0; f < features.size(); f++) {
+							rsa.stepBegin();
+
+							for (int s = 0; s < 26; s++)
+								rsa.setVisibleNodeState(s, features[f].getCoeff(s) * 0.01f);
+
+							rsa.activate(sparsity, dutyCycleDecay);
+						}
+
+						// Classifier
+						std::cout << "SDR: " << std::endl;
+
+						for (int p = 0; p < numHidden; p++) {
+							if (rsa.getHiddenNodeState(p) > 0.001f)
+								std::cout << "X";
+							else
+								std::cout << "_";
+
+							ffnn.setInput(p, rsa.getHiddenNodeState(p));
+						}
+
+						ffnn.activate();
+
+						int maxIndex = 0;
+
+						for (int c = 0; c < classes; c++) {
+							if (ffnn.getOutput(c) > ffnn.getOutput(maxIndex))
+								maxIndex = c;
+						}
+
+						std::cout << "Class: " << maxIndex << std::endl;
+
+						recording = false;
+					}
+					else {
+						recorder.start();
+
+						recording = true;
+					}
+				}
+			}
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			quit = true;
+
+		window.display();
+
+		float dt = clock.getElapsedTime().asSeconds();
+	} while (!quit);
+
+	return 0;
+}*/
+
+/*int main() {
+	std::mt19937 generator(time(nullptr));
+
+	text::Word2SDR w2sdr;
+	text::Word2SDR::Settings settings;
+
+	w2sdr.createRandom(64, settings, -0.1f, 0.1f, 0.5f, generator);
+
+	for (int i = 0; i < 10; i++) {
+		w2sdr.clearMemory();
+
+		std::ifstream fromFile("Resources/corpus.txt");
+
+		w2sdr.read(fromFile);
+
+		std::cout << "Corpus Iteration " << i << std::endl;
+	}
+
+	w2sdr.clearMemory();
+
+	std::ifstream fromFile("Resources/corpus.txt");
+
+	std::string firstWord;
+	fromFile >> firstWord;
+
+	w2sdr.show(firstWord);
+
+	std::cout << firstWord << " ";
+
+	for (int i = 0; i < 200; i++) {
+		std::cout << w2sdr.getPrediction() << " ";
+
+		w2sdr.show(w2sdr.getPrediction());
+	}
+
+	w2sdr.clearMemory();
+
+	const std::string escapeWord = "!EXIT";
+	const std::string clearMemoryWord = "!MEM";
+
+	std::cout << "Ready" << std::endl;
+
+	std::string word = "";
+
+	while (word != escapeWord) {
+		std::cin >> word;
+
+		if (word == clearMemoryWord)
+			w2sdr.clearMemory();
+		else {
+			w2sdr.show(word);
+
+			std::cout << "Prediction: " << w2sdr.getPrediction() << std::endl;
+		}
+	}
+
+	system("pause");
+
+	return 0;
+}*/
+
+float sigmoid(float x) {
+	return 1.0f / (1.0f + std::exp(-x));
+}
+
+/*int main() {
+	std::mt19937 generator(time(nullptr));
+
+	sf::Image img;
+
+	img.loadFromFile("testImage.png");
+
+	deep::SparseCoder sc;
+
+	int winWidth = 16;
+	int winHeight = 16;
+	int sdrWidth = 22;
+	int sdrHeight = 22;
+
+	float sparsity = 3.0f / (sdrWidth * sdrHeight);
+	float lambda = 10.0f;
+
+	sc.createRandom(winWidth * winHeight, sdrWidth * sdrHeight, generator);
+
+	std::uniform_int_distribution<int> widthDist(0, img.getSize().x - winWidth);
+	std::uniform_int_distribution<int> heightDist(0, img.getSize().y - winHeight);
+
+	sf::RenderWindow window;
+
+	sf::SoundBufferRecorder recorder;
+
+	sf::Clock clock;
+
+	window.create(sf::VideoMode(800, 800), "SDRs", sf::Style::Default);
+
+	for (int iter = 0; iter < 100000; iter++) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			break;
+
+		int wx = widthDist(generator);
+		int wy = heightDist(generator);
+
+		int inputIndex = 0;
+
+		for (int x = 0; x < winWidth; x++)
+			for (int y = 0; y < winHeight; y++) {
+				int tx = wx + x;
+				int ty = wy + y;
+
+				sc.setVisibleInput(inputIndex++, img.getPixel(tx, ty).r / 255.0f);
+			}
+
+		sc.activate(sparsity, lambda, 0.05f);
+
+		sc.reconstruct();
+
+		sc.learn(0.002f, 0.001f, 0.002f, sparsity);
+
+		if (iter % 10 == 0) {
+			std::cout << "Iteration " << iter << std::endl;
+
+			float minWeight = 9999.0f;
+			float maxWeight = -9999.0f;
+
+			for (int sx = 0; sx < sdrWidth; sx++)
+				for (int sy = 0; sy < sdrHeight; sy++) {
+					for (int x = 0; x < winWidth; x++)
+						for (int y = 0; y < winHeight; y++) {
+							float w = sc.getVHWeight(sx + sy * sdrWidth, x + y * winWidth);
+
+							minWeight = std::min(minWeight, w);
+							maxWeight = std::max(maxWeight, w);
+						}
+				}
+
+			sf::Image rfs;
+			rfs.create(sdrWidth * winWidth, sdrHeight * winHeight);
+
+			float scalar = 1.0f / (maxWeight - minWeight);
+
+			for (int sx = 0; sx < sdrWidth; sx++)
+				for (int sy = 0; sy < sdrHeight; sy++) {
+					for (int x = 0; x < winWidth; x++)
+						for (int y = 0; y < winHeight; y++) {
+							sf::Color color;
+
+							color.r = color.b = color.g = 255 * scalar * (sc.getVHWeight(sx + sy * sdrWidth, x + y * winWidth) - minWeight);
+							color.a = 255;
+
+							rfs.setPixel(sx * winWidth + x, sy * winHeight + y, color);
+						}
+				}
+
+			sf::Texture t;
+			t.loadFromImage(rfs);
+
+			sf::Sprite s;
+			s.setTexture(t);
+
+			s.setScale(2.0f, 2.0f);
+
+			window.clear();
+			window.draw(s);
+
+			for (int sx = 0; sx < sdrWidth; sx++)
+				for (int sy = 0; sy < sdrHeight; sy++) {
+					if (sc.getHiddenState(sx + sy * sdrWidth) > 0.0f) {
+						sf::RectangleShape rs;
+
+						rs.setPosition(sx * winWidth * 2.0f, sy * winHeight * 2.0f);
+						rs.setOutlineColor(sf::Color::Red);
+						rs.setFillColor(sf::Color::Transparent);
+						rs.setOutlineThickness(2.0f);
+
+						rs.setSize(sf::Vector2f(winWidth * 2.0f, winHeight * 2.0f));
+
+						window.draw(rs);
+					}
+				}
+
+			window.display();
+
+			std::vector<float> recon(img.getSize().x * img.getSize().y, 0.0f);
+			std::vector<float> sums(img.getSize().x * img.getSize().y, 0.0f);
+
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
+				for (int wx = 0; wx < img.getSize().x - winWidth; wx++)
+					for (int wy = 0; wy < img.getSize().y - winHeight; wy++) {
+						inputIndex = 0;
+
+						for (int x = 0; x < winWidth; x++)
+							for (int y = 0; y < winHeight; y++) {
+								int tx = wx + x;
+								int ty = wy + y;
+
+								sc.setVisibleInput(inputIndex++, img.getPixel(tx, ty).r / 255.0f);
+							}
+
+						sc.activate(sparsity, lambda, 0.05f);
+
+						sc.reconstruct();
+
+						inputIndex = 0;
+
+						for (int x = 0; x < winWidth; x++)
+							for (int y = 0; y < winHeight; y++) {
+								int tx = wx + x;
+								int ty = wy + y;
+
+								recon[tx + ty * img.getSize().x] += sc.getVisibleRecon(inputIndex++);
+								sums[tx + ty * img.getSize().x] += 1.0f;
+							}
+					}
+
+				sf::Image reconImg;
+				reconImg.create(img.getSize().x, img.getSize().y);
+
+				float minimum = 99999.0f;
+				float maximum = -99999.0f;
+
+				for (int x = 0; x < img.getSize().x; x++)
+					for (int y = 0; y < img.getSize().y; y++) {
+						recon[x + y * img.getSize().x] /= sums[x + y * img.getSize().x];
+
+						minimum = std::min(minimum, recon[x + y * img.getSize().x]);
+						maximum = std::max(maximum, recon[x + y * img.getSize().x]);
+					}
+
+				for (int x = 0; x < img.getSize().x; x++)
+					for (int y = 0; y < img.getSize().y; y++) {
+						sf::Color c;
+
+						c.r = c.g = c.b = 255.0f * (recon[x + y * img.getSize().x] - minimum) / (maximum - minimum);
+						c.a = 255;
+
+						reconImg.setPixel(x, y, c);
+					}
+
+				reconImg.saveToFile("reconstructionImage.png");
+			}
+		}
+	}
+
+	float minWeight = 9999.0f;
+	float maxWeight = -9999.0f;
+
+	for (int sx = 0; sx < sdrWidth; sx++)
+		for (int sy = 0; sy < sdrHeight; sy++) {
+			for (int x = 0; x < winWidth; x++)
+				for (int y = 0; y < winHeight; y++) {
+					float w = sc.getVHWeight(sx + sy * sdrWidth, x + y * winWidth);
+					
+					minWeight = std::min(minWeight, w);
+					maxWeight = std::max(maxWeight, w);
+				}
+		}
+
+	sf::Image rfs;
+	rfs.create(sdrWidth * winWidth, sdrHeight * winHeight);
+
+	float scalar = 1.0f / (maxWeight - minWeight);
+
+	for (int sx = 0; sx < sdrWidth; sx++)
+		for (int sy = 0; sy < sdrHeight; sy++) {
+			for (int x = 0; x < winWidth; x++)
+				for (int y = 0; y < winHeight; y++) {
+					sf::Color color;
+
+					color.r = color.b = color.g = 255 * scalar * (sc.getVHWeight(sx + sy * sdrWidth, x + y * winWidth) - minWeight);
+					color.a = 255;
+
+					rfs.setPixel(sx * winWidth + x, sy * winHeight + y, color);
+				}
+		}
+
+	rfs.saveToFile("rfs.png");
+
+	return 0;
 }*/

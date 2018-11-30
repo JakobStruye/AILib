@@ -107,5 +107,5 @@ void CHTMRL::step(float reward, const std::vector<float> &input, const std::vect
 
 	_prevInput = action;
 
-	std::cout << maxValue << std::endl;
+    //std::cout << maxValue << std::endl;
 }

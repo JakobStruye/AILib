@@ -25,12 +25,11 @@ misrepresented as being the original software.
 
 #include <deep/FA.h>
 
-#include <rbf/RBFNetwork.h>
-
 #include <algorithm>
 
 #include <assert.h>
 
+#include <list>
 namespace htmrl {
 	float defaultBoostFunctionDiscreteAction(float active, float minimum);
 
