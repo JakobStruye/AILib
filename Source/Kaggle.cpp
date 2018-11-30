@@ -10,7 +10,7 @@
 #include <sstream>
 #include <string>
 
-#include <dirent.h>
+//#include <dirent.h>
 
 struct Label {
 	std::string _name;

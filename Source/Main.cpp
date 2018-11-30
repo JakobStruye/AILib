@@ -76,6 +76,7 @@ misrepresented as being the original software.
 
 #include <plot/plot.h>
 
+#include <deep/SparseCoder.h>
 #include <deep/RBM.h>
 #include <deep/DBN.h>
 #include <deep/ConvNet2D.h>
@@ -98,7 +99,7 @@ misrepresented as being the original software.
 
 #include <text/Word2SDR.h>
 
-#include <dirent.h>
+//#include <dirent.h>
 
 /*int main() {
 	std::mt19937 generator(time(nullptr));
@@ -1217,7 +1218,8 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 	return 0;
 }*/
 
-/*int main() {
+/*int main(int argc, char* argv[]) {
+    std::cout << argv[0] << std::endl;
 	std::mt19937 generator(time(nullptr));
 
 	float inputs[4][2] {
@@ -1274,8 +1276,6 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 
 		std::cout << out[0] << std::endl;
 	}
-
-	system("pause");
 
 	float reward = 0.0f;
 	float prevReward = 0.0f;
@@ -1631,7 +1631,10 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 
 			plot.prepare();
 
-			cAverage.prepare(sf::Vector2f(0.0f, totalTime), sf::Vector2f(plotMin, plotMax));
+            sf::Vector2f vec1 = sf::Vector2f(0.0f, totalTime);
+            sf::Vector2f vec2 = sf::Vector2f(plotMin, plotMax);
+
+			cAverage.prepare(vec1, vec2);
 
 			rt.draw(plot);
 
@@ -2197,7 +2200,7 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 	} while (!quit);
 }*/
 
-/*int main() {
+int main() {
 	sf::RenderWindow window;
 
 	window.create(sf::VideoMode(800, 600), "Mountain Car");
@@ -2315,8 +2318,10 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 
 		actionMask[2] = true;
 		actionMask[3] = true;
-
-		htm.step(fitness, state, actionMask, action, 0.5f, 16, 0.1f, 0.9f, 0.0f, 0.1f, 16.0f, 1.0f, 8, 16.0f, 16.0f, 16.0f, 0.0001f, 0.01f, 0.01f, 0.01f, 0.1f, 0.1f, 0.0f, 0.05f, 0.5f, 0.99f, 0.97f, 1.0f, 0.05f, 0.05f, generator);
+		// THE FOURTEENTH (LOCALACTIVITY) IS GUESSTIMATED
+		htm.step(fitness, state, actionMask, action, 0.5f, 16, 0.1f, 0.9f, 0.0f, 0.1f, 16.0f, 1.0f, 8, 2.0f, 16.0f, 16.0f,
+		        16.0f, 0.0001f, 0.01f, 0.01f, 0.01f, 0.1f, 0.1f, 0.0f, 0.05f, 0.5f, 0.99f, 0.97f, 1.0f, 0.05f, 0.05f,
+		        generator);
 
 		float actionf;
 
@@ -2340,13 +2345,13 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 		// Draw hills
 		window.draw(&hills[0], hills.size(), sf::Lines);
 
-		cartSprite.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) * 0.5f + pixelsPerMeter * position, static_cast<float>(window.getSize().y) * 0.5f + pixelsPerMeter * -0.333f * std::sinf(3.0f * position)));
+		cartSprite.setPosition(sf::Vector2f(static_cast<float>(window.getSize().x) * 0.5f + pixelsPerMeter * position, static_cast<float>(window.getSize().y) * 0.5f + pixelsPerMeter * -0.333f * sinf(3.0f * position)));
 
 		float slope = std::cos(3.0f * position);
 
 		float angle = std::atan(slope);
 
-		cartSprite.setRotation(360.0f - 180.0f / static_cast<float>(std::_Pi) * angle);
+		cartSprite.setRotation(360.0f - 180.0f / static_cast<float>(M_PI) * angle);
 
 		window.draw(cartSprite);
 
@@ -2381,7 +2386,7 @@ float evaluateXOR(ctrnn::CTRNN &net, std::mt19937 &generator) {
 
 		//dt = clock.getElapsedTime().asSeconds();
 	} while (!quit);
-}*/
+}
 
 /*const size_t entrySize = 30; // 31 if you include the weight
 
@@ -4978,7 +4983,7 @@ float sigmoid(float x) {
 	return 1.0f / (1.0f + std::exp(-x));
 }
 
-int main() {
+/*int main() {
 	std::mt19937 generator(time(nullptr));
 
 	sf::Image img;
@@ -5191,4 +5196,4 @@ int main() {
 	rfs.saveToFile("rfs.png");
 
 	return 0;
-}
+}*/

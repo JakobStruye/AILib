@@ -20,6 +20,7 @@ misrepresented as being the original software.
 */
 
 #pragma once
+#include <cstddef>
 
 namespace htm {
 	struct ColumnAndCellIndices {
